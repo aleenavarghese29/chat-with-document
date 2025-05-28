@@ -1,13 +1,18 @@
-
 import nltk
 
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
+def download_nltk_resources():
+    resources = ['punkt', 'stopwords', 'wordnet']
+    for resource in resources:
+        try:
+            nltk.data.find(f'tokenizers/{resource}' if resource == 'punkt' else f'corpora/{resource}')
+        except LookupError:
+            nltk.download(resource)
+
+download_nltk_resources()
+
 import os
 import re
 import fitz  # PyMuPDF
-import nltk
 import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -16,10 +21,6 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from textblob import TextBlob
 from sklearn.metrics import precision_score, recall_score
-
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
 
 @st.cache_data
 def extract_text(file):
