@@ -35,7 +35,7 @@ from nltk.stem import WordNetLemmatizer
 from textblob import TextBlob
 
 # --- Functions ---
-@st.cache_data
+@st.cache_resource
 def extract_text(file):
     if file.type == 'application/pdf':
         doc = fitz.open(stream=file.read(), filetype="pdf")
