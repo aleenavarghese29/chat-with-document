@@ -1,17 +1,29 @@
-# test change for git
+# --- NLTK Setup for Streamlit ---
 import nltk
 import os
+import ssl
 
-# Set up a persistent NLTK data directory
+# Handle SSL certificate issues for NLTK in hosted environments
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+# Set up persistent NLTK data directory
 nltk_data_dir = os.path.join(os.path.expanduser("~"), "nltk_data")
 os.makedirs(nltk_data_dir, exist_ok=True)
-nltk.download('punkt', download_dir=nltk_data_dir)
-nltk.download('stopwords', download_dir=nltk_data_dir)
-nltk.download('wordnet', download_dir=nltk_data_dir)
-nltk.data.path.append(nltk_data_dir)  # Make sure NLTK uses this path
+nltk.data.path.append(nltk_data_dir)
 
+# Download required NLTK data if not present
+for resource in ['punkt', 'stopwords', 'wordnet']:
+    try:
+        nltk.data.find(resource)
+    except LookupError:
+        nltk.download(resource, download_dir=nltk_data_dir)
 
-import os
+# --- Imports ---
 import re
 import fitz  # PyMuPDF
 import streamlit as st
@@ -21,8 +33,8 @@ from rank_bm25 import BM25Okapi
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from textblob import TextBlob
-from sklearn.metrics import precision_score, recall_score
 
+# --- Functions ---
 @st.cache_data
 def extract_text(file):
     if file.type == 'application/pdf':
@@ -65,10 +77,11 @@ def analyze_sentiment(text):
 def summarize_text(text):
     try:
         blob = TextBlob(text)
-        return " ".join(blob.sentences[:3])
+        return " ".join(str(s) for s in blob.sentences[:3])
     except:
         return "Summary Unavailable"
 
+# --- Streamlit App ---
 st.title("📝 Chat-with-Documents: Classical IR Edition")
 
 uploaded_file = st.file_uploader("Upload PDF or Text File", type=["pdf", "txt"])
@@ -108,8 +121,13 @@ if uploaded_file:
             text_chunk = chunks[idx]
             score = scores[idx]
             sentiment, color = analyze_sentiment(text_chunk)
-            highlighted = re.sub(rf"({'|'.join(query_tokens)})", r"**\1**", text_chunk, flags=re.IGNORECASE)
-            st.markdown(f"<span style='color:{color}'><b>[{sentiment}]</b></span> ({round(score, 3)}):<br>{highlighted}", unsafe_allow_html=True)
+            # Escape special characters in query_tokens for safe regex
+            escaped_tokens = [re.escape(token) for token in query_tokens]
+            highlighted = re.sub(rf"({'|'.join(escaped_tokens)})", r"**\1**", text_chunk, flags=re.IGNORECASE)
+            st.markdown(
+                f"<span style='color:{color}'><b>[{sentiment}]</b></span> ({round(score, 3)}):<br>{highlighted}",
+                unsafe_allow_html=True
+            )
 
         st.subheader("🧾 Document Summary")
         summary = summarize_text(raw_text)
