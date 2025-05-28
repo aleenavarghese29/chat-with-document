@@ -1,5 +1,6 @@
 # --- NLTK Setup for Streamlit ---
 import nltk
+nltk.download('punkt_tab')
 import os
 import ssl
 
