@@ -5,3 +5,6 @@ PyMuPDF
 textblob
 scikit-learn
 rank_bm25
+python-docx
+plotly
+numpy
