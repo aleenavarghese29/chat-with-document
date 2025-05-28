@@ -1,7 +1,9 @@
-# Chat-with-Documents Web App (Classical IR Version)
-# Author: Open Source Community
-# Description: Lightweight, interpretable document QA system using TF-IDF & BM25 (No LLM)
 
+import nltk
+
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
 import os
 import re
 import fitz  # PyMuPDF
