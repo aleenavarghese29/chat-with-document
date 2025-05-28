@@ -1,0 +1,7 @@
+streamlit
+pandas
+nltk
+PyMuPDF
+textblob
+scikit-learn
+rank_bm25
